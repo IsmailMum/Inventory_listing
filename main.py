@@ -1,15 +1,17 @@
 import create_reports
-from utils import mongo_utils, json_utils
+from utils.mongo_utils import MongoDB
+from utils import json_utils
 
-#Read counts data and insert to 'Inventory' database
-counts = json_utils.read_counts(file = "inventory/counts.json")
-mongo_utils.insert_counts(mongo_utils.create_db_connection(), counts)
+if __name__ == "__main__":
+    counts = json_utils.read_counts(file = "inventory/counts-simple.json")
+    MongoDB().insert_counts(counts)
 
-#Read master data and insert to 'Inventory' database
-master = json_utils.read_master(file = "inventory/master.json")
-mongo_utils.insert_master(mongo_utils.create_db_connection(), master)
+    master = json_utils.read_master(file = "inventory/master-simple.json")
+    MongoDB().insert_master(master)
 
-#Create report files.
-lba_list = create_reports.create_LBA_report(mongo_utils.create_db_connection())
-create_reports.create_BA_report(lba_list)
-create_reports.create_aggregated_report(mongo_utils.create_db_connection(), lba_list)
+    lba_list = create_reports.create_LBA_report(MongoDB())
+    create_reports.create_BA_report(lba_list)
+    create_reports.create_aggregated_report(MongoDB(), lba_list)
+
+#    MongoDB().drop_counts()
+#    MongoDB().drop_master()

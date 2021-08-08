@@ -1,4 +1,4 @@
 mongoenv/
 .vscode/
 __pycache__/
-*.json
+tests/

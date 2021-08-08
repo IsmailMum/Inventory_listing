@@ -1,12 +1,12 @@
 import utils.json_utils as json_utils
-import utils.mongo_utils as mongo_utils
+from utils.mongo_utils import MongoDB
+
 
 def create_LBA_list(db_connection):
     pass
 
-# Location, Barcode and Amount report
-def create_LBA_report(db_connection, report_file = 'reports/location_barcode_amount.txt'):
-    counts = mongo_utils.find_counts(db_connection)
+def create_LBA_report(db: MongoDB, report_file = 'reports/location_barcode_amount.txt'):
+    counts = db.find_counts()
     location_barcode_amount = list()
 
     with open(report_file, 'w') as file :
@@ -14,7 +14,7 @@ def create_LBA_report(db_connection, report_file = 'reports/location_barcode_amo
 
         for location in counts:
             for content in location['completedCounts'][0]['contents']:
-                file.write(str(location['locationCode']) + ";" + str(content['barcode']) + ";" + str(content['amount']) + "\n")
+                file.write(location['locationCode'] + ";" + content['barcode'] + ";" + str(content['amount']) + "\n")
 
                 location_barcode_amount.append({
                     'location': location['locationCode'],
@@ -24,7 +24,7 @@ def create_LBA_report(db_connection, report_file = 'reports/location_barcode_amo
 
     return location_barcode_amount
 
-# Barcode and Amount report
+
 def create_BA_report(lba_list, report_file = 'reports/barcode_amount.txt'):
     ba_report = {}
 
@@ -40,8 +40,8 @@ def create_BA_report(lba_list, report_file = 'reports/barcode_amount.txt'):
             file.write(barcode + ";" + str(amount) + "\n")
             amount = 0
 
-def create_aggregated_report(db_connection, lba_list, report_file= 'reports/aggregated_report.txt'):
-    master = mongo_utils.find_master(mongo_utils.create_db_connection())
+def create_aggregated_report(db: MongoDB, lba_list, report_file= 'reports/aggregated_report.txt'):
+    master = db.find_master()
 
     with open(report_file, 'w') as file:
         file.write("location;barcode;amount;sku;urun adi\n")
@@ -50,4 +50,3 @@ def create_aggregated_report(db_connection, lba_list, report_file= 'reports/aggr
             for lba in lba_list:
                 if m['barcode'] == lba['barcode']:
                     file.write(lba['location'] + ";" + lba['barcode'] + ";" + str(lba['amount']) + ";" + m['sku'] + ";" + m["urun adi"] + "\n")
-
